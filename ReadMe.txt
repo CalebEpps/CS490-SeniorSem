@@ -28,3 +28,5 @@ Upon clicking the button it will prompt you to select an image
 After you have selected an image a text is located underneath the selected image.
 
 Congratulations you have ran the app.
+
+
