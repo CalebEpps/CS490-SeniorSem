@@ -13,15 +13,17 @@ class FashionLoader(Dataset):
     ### Initialize dataset class, inherits parent
     def __init__(self, batch_size=64):
         self.batch_size = batch_size
-        logging.info(('Batch Size set to ', self.batch_size))
+        print(f"Batch Size set to {self.batch_size}")
 
         self.transform = transforms.Compose([transforms.ToTensor()])
         self.training_set = FashionMNIST(root="../../Dataset/data", train=True, download=True, transform=self.transform)
         self.training_loader = DataLoader(self.training_set, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
     def display(self):
-        img, label = next(iter(self.training_set))
-        plt.imshow(img.squeeze(), cmap="gray")
+        img = self.training_set[0][0]
+        label = self.training_set[0]
+        plt.imshow(img.squeeze(), cmap="Greys")
+        plt.show()
         print(label)
 
     def training_set_length(self):
@@ -29,6 +31,6 @@ class FashionLoader(Dataset):
 
 if __name__ == "__main__":
     categories = []
-    fs = FashionLoader(batch_size=64)
+    fs = FashionLoader(batch_size=128)
     fs.display()
 
