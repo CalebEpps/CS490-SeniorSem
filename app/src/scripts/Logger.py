@@ -7,3 +7,5 @@ class Training_Logger:
         # Add functions for when the run ends, when epochs end, and when epochs start.
         # Add trackers for correct predictions
         # Maybe save to file?
+
+

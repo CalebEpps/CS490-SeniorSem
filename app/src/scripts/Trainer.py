@@ -28,7 +28,7 @@ class FashionTrainer:
 
     def train(self):
 
-        network = Network()
+        model = FashionMNISTModel()
 
         for epoch in range(self.epochs):
             loss = 0.0
@@ -39,7 +39,7 @@ class FashionTrainer:
             for x, (img, label) in enumerate(self.loader.training_set):
                 imgs = img.to(self.device)
                 labels = label.to(self.device)
-            # Finish this AFTER finishing Logger file. Makes more sense
+
 
 
 
