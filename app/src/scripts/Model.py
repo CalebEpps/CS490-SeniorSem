@@ -20,10 +20,10 @@ class FashionMNISTModel(nn.Module):
         in_item = self.cl_1(in_item)
         in_item = F.relu(input)
 
-        # Converrs 32 to 32x26x26
+        # Converts 32 to 32x26x26
         in_item = in_item.flatten(1)
 
-        # Previous to 32x128
+        # Previous to 32x128 
         in_item = self.linear_1(in_item)
         in_item = F.relu(in_item)
 
