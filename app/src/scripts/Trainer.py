@@ -77,5 +77,5 @@ class FashionTrainer:
 
 
 if __name__ == "__main__":
-    trainer = FashionTrainer(lr=0.01, epochs=30)
+    trainer = FashionTrainer(lr=0.001, epochs=30)
     trainer.train()
