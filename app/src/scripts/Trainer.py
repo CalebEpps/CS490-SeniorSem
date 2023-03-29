@@ -5,6 +5,8 @@ from torch.utils.data import Dataset, DataLoader
 from Model import FashionMNISTModel
 from Loader import FashionLoader
 
+from torch.utils.tensorboard import SummaryWriter # importing summarywriter for tensorboard
+writer = SummaryWriter()
 
 class FashionTrainer:
     # Placeholder params for later (model)

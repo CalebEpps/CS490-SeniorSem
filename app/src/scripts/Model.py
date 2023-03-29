@@ -29,6 +29,7 @@ class FashionMNISTModel(nn.Module):
         # *|CURSOR_MARCADOR|*
         in_item = max_pool2d(in_item, kernel_size=2, stride=1)
 
+
         # Do convolution 2
         in_item = self.cl_2(in_item)
         in_item = relu(in_item)
@@ -36,6 +37,7 @@ class FashionMNISTModel(nn.Module):
 
         # reshape for Linear
         in_item = in_item.reshape(-1, 12*4*4)
+        
         # Do Linear 1
         in_item = self.linear_1(in_item)
         in_item = relu(in_item)
