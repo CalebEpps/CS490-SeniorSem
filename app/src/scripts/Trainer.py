@@ -5,8 +5,9 @@ from torch.utils.data import Dataset, DataLoader
 from Model import FashionMNISTModel
 from Loader import FashionLoader
 
-#from torch.utils.tensorboard import SummaryWriter # importing summarywriter for tensorboard
-#writer = SummaryWriter()
+
+# from torch.utils.tensorboard import SummaryWriter # importing summarywriter for tensorboard
+# writer = SummaryWriter()
 
 class FashionTrainer:
     # Placeholder params for later (model)
@@ -27,20 +28,20 @@ class FashionTrainer:
 
         self.opt = torch.optim.Adam(self.model.parameters(), lr=self.lr)
 
-
     def train(self):
 
         model = FashionMNISTModel()
-        model.train()
+        total_loss = 0.0
+
         for epoch in range(self.epochs):
+
+            model.train(True)
+
             curr_loss = 0.0
-            prev_loss = 0.0
-            accuracy = 0.0
 
-            trained_model = self.model.train()
-
+            count = 0
             for img, label in self.loader.training_loader:
-
+                count += 1
                 img = img.to(self.device)
                 label = label.to(self.device)
 
@@ -55,22 +56,14 @@ class FashionTrainer:
 
                 curr_loss += loss.item()
 
+            total_loss = curr_loss / count
 
-
-
-
-
-
-
-
-
-
-
+            print("Epoch: ", epoch)
+            print("Total Loss: ", total_loss)
+            print("Current Loss: ", curr_loss)
 
     def set_epochs(self, epochs):
         self.epochs = epochs
-
-
 
     @staticmethod
     def has_gpu():
@@ -86,4 +79,3 @@ class FashionTrainer:
 if __name__ == "__main__":
     trainer = FashionTrainer(lr=0.01, epochs=30)
     trainer.train()
-
