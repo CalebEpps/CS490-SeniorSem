@@ -29,16 +29,30 @@ class FashionTrainer:
     def train(self):
 
         model = FashionMNISTModel()
-
+        model.train()
         for epoch in range(self.epochs):
             loss = 0.0
             accuracy = 0.0
 
             trained_model = self.model.train()
 
-            for x, (img, label) in enumerate(self.loader.training_set):
-                imgs = img.to(self.device)
-                labels = label.to(self.device)
+            for img, label in self.loader.training_loader:
+
+                img = img.to(self.device)
+                label = label.to(self.device)
+
+                prediction = model.forward(img)
+                self.crit(prediction, label)
+
+                self.opt.zero_grad()
+                self.crit.backward()
+
+                self.opt.step()
+
+
+
+
+
 
 
 
@@ -64,4 +78,5 @@ class FashionTrainer:
 
 if __name__ == "__main__":
     trainer = FashionTrainer(lr=0.01, epochs=30)
+    trainer.train()
 
