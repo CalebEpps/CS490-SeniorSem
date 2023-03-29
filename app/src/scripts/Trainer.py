@@ -5,8 +5,8 @@ from torch.utils.data import Dataset, DataLoader
 from Model import FashionMNISTModel
 from Loader import FashionLoader
 
-from torch.utils.tensorboard import SummaryWriter # importing summarywriter for tensorboard
-writer = SummaryWriter()
+#from torch.utils.tensorboard import SummaryWriter # importing summarywriter for tensorboard
+#writer = SummaryWriter()
 
 class FashionTrainer:
     # Placeholder params for later (model)
@@ -33,7 +33,8 @@ class FashionTrainer:
         model = FashionMNISTModel()
         model.train()
         for epoch in range(self.epochs):
-            loss = 0.0
+            curr_loss = 0.0
+            prev_loss = 0.0
             accuracy = 0.0
 
             trained_model = self.model.train()
@@ -43,13 +44,17 @@ class FashionTrainer:
                 img = img.to(self.device)
                 label = label.to(self.device)
 
-                prediction = model.forward(img)
-                self.crit(prediction, label)
-
                 self.opt.zero_grad()
-                self.crit.backward()
+
+                output = model(img)
+
+                loss = self.crit(output, label)
+                loss.backward()
 
                 self.opt.step()
+
+                curr_loss += loss.item()
+
 
 
 
