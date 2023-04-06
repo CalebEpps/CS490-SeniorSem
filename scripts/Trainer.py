@@ -39,17 +39,19 @@ class FashionTrainer:
             correct = 0
             # iterator
             count = 0
+            inner_count = 0
             for img, label in self.loader.training_loader:
+                inner_count += 1
                 # Send image and labels to device.
                 img = img.to(self.device)
                 label = label.to(self.device)
                 output = self.model(img)
                 loss = self.crit(output, label)
 
-                curr_loss = loss.item()
+                curr_loss = curr_loss + loss.item()
 
                 # Write to TB
-                self.writer.add_scalar('Training Loss', curr_loss, global_step=epoch)
+                self.writer.add_scalar('Training Loss', curr_loss / inner_count, global_step=epoch)
 
                 # Set gradient
                 self.opt.zero_grad()
@@ -115,13 +117,17 @@ class FashionTrainer:
         self.writer.close()
         self.save()
 
+    def test(self):
+        size = len(self.loader.validation_loader)
+
+
 
 
     def set_epochs(self, epochs):
         self.epochs = epochs
 
     def save(self):
-        torch.save(self.model.state_dict(), "model.pth")
+        torch.save(self.model.state_dict(), "model.pt")
 
     def get_correct_preds(self, out, labels):
         return out.argmax(dim=1).eq(labels).sum().item()
@@ -139,5 +145,5 @@ class FashionTrainer:
 
 
 if __name__ == "__main__":
-    trainer = FashionTrainer(lr=0.001, epochs=50)
-    trainer.validate()
+    trainer = FashionTrainer(lr=0.001, epochs=100)
+    trainer.train()
