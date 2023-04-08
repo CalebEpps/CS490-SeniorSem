@@ -20,18 +20,9 @@ class FashionLoader(Dataset):
         self.training_loader = DataLoader(self.training_set, batch_size=self.batch_size, shuffle=True, num_workers=0)
         self.validation_loader = DataLoader(self.training_set, batch_size=self.batch_size, shuffle=False)
 
-    def display(self):
-        img = self.training_set[0][0]
-        label = self.training_set[0]
-        plt.imshow(img.squeeze(), cmap="Greys")
-        plt.show()
-        print(label)
+        self.classes = ('T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+                   'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot')
 
     def training_set_length(self):
         return len(self.training_set)
-
-if __name__ == "__main__":
-    categories = []
-    fs = FashionLoader(batch_size=128)
-    fs.display()
 

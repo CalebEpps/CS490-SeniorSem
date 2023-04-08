@@ -11,7 +11,10 @@ class FashionMNISTModel(nn.Module):
         super(FashionMNISTModel, self).__init__()
 
         self.cl_1 = nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5)
+<<<<<<< HEAD:app/src/scripts/Model.py
         self.m_pool = nn.MaxPool2d(2, 2)
+=======
+>>>>>>> 64692162f22557e85f946fdae0f628647a100d34:scripts/Model.py
         self.cl_2 = nn.Conv2d(in_channels=6, out_channels=12, kernel_size=5)
 
         self.linear_1 = nn.Linear(in_features=(12 * 4 * 4), out_features=120)
@@ -25,7 +28,10 @@ class FashionMNISTModel(nn.Module):
         # do convolution 1
         in_item = self.cl_1(in_item)
         in_item = relu(in_item)
+<<<<<<< HEAD:app/src/scripts/Model.py
         # *|CURSOR_MARCADOR|*
+=======
+>>>>>>> 64692162f22557e85f946fdae0f628647a100d34:scripts/Model.py
         in_item = max_pool2d(in_item, kernel_size=2, stride=2)
 
 
@@ -35,7 +41,11 @@ class FashionMNISTModel(nn.Module):
         in_item = max_pool2d(in_item, kernel_size=2, stride=2)
 
         # reshape for Linear
+<<<<<<< HEAD:app/src/scripts/Model.py
         in_item = in_item.reshape(-1, 12 * 4 * 4)
+=======
+        in_item = torch.flatten(in_item, start_dim=1)
+>>>>>>> 64692162f22557e85f946fdae0f628647a100d34:scripts/Model.py
         
         # Do Linear 1
         in_item = self.linear_1(in_item)
