@@ -71,7 +71,7 @@ class FashionTrainer:
 
         self.writer.close()
 
-    def validate(self):
+    def test(self):
         total_loss = 0.0
         # Begin Epoch Run
         for epoch in range(self.epochs):
@@ -114,12 +114,6 @@ class FashionTrainer:
 
         self.writer.close()
         self.save()
-
-    def test(self):
-        size = len(self.loader.validation_loader)
-
-
-
 
     def set_epochs(self, epochs):
         self.epochs = epochs
