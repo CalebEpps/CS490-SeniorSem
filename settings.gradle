@@ -3,6 +3,15 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        //jcenter()
+
+        maven {
+            url "https://jitpack.io"
+            //url "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+        maven {
+            url "https://pytorchandroid.s3.amazonaws.com/repository/pytorch_gradle_plugin/release/"
+        }
     }
 }
 dependencyResolutionManagement {
