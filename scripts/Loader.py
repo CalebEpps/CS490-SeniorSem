@@ -17,9 +17,10 @@ class FashionLoader(Dataset):
 
         self.transform = transforms.Compose([transforms.ToTensor()])
         self.training_set = FashionMNIST(root="../../Dataset/data", train=True, download=True, transform=self.transform)
+        self.test_set = FashionMNIST(root="../../Dataset/data", train=False, download=True, transform=self.transform)
         # Divide training set into 2 pieces (80% training, 20% validation)
         self.training_loader = DataLoader(self.training_set, batch_size=self.batch_size, shuffle=True, num_workers=0)
-        self.validation_loader = DataLoader(self.training_set, batch_size=self.batch_size, shuffle=False)
+        self.test_loader = DataLoader(self.test_set, batch_size=self.batch_size, shuffle=False)
 
         self.classes = ('T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
                    'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot')

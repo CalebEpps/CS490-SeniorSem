@@ -1,54 +1,23 @@
-import torch.cuda
+import torch
 import torch.nn as nn
-from torch import relu, max_pool2d
-
-from torch.utils.data import Dataset, DataLoader
+import torch.nn.functional as F
 
 
-class FashionMNISTModel(nn.Module):
+class Net(nn.Module):
     def __init__(self):
-        # Init parent const
-        super(FashionMNISTModel, self).__init__()
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 4 * 4, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
 
-        self.cl_1 = nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5)
-        self.cl_2 = nn.Conv2d(in_channels=6, out_channels=12, kernel_size=5)
-
-        self.linear_1 = nn.Linear(in_features=(12 * 4 * 4), out_features=120)
-        self.linear_2 = nn.Linear(in_features=120, out_features=60)
-
-        self.out = nn.Linear(in_features=60, out_features=10)
-
-
-    def forward(self, in_item):
-
-        # do convolution 1
-        in_item = self.cl_1(in_item)
-        in_item = relu(in_item)
-        in_item = max_pool2d(in_item, kernel_size=2, stride=2)
-
-
-        # Do convolution 2
-        in_item = self.cl_2(in_item)
-        in_item = relu(in_item)
-        in_item = max_pool2d(in_item, kernel_size=2, stride=2)
-
-        # reshape for Linear
-        in_item = torch.flatten(in_item, start_dim=1)
-        
-        # Do Linear 1
-        in_item = self.linear_1(in_item)
-        in_item = relu(in_item)
-
-        # Do Linear 2
-        in_item = self.linear_2(in_item)
-        in_item = relu(in_item)
-
-        in_item = self.out(in_item)
-        return in_item
-    
-
-
-
-
-
-
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = torch.flatten(x, 1) # flatten all dimensions except batch
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
