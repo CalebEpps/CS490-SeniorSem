@@ -26,8 +26,9 @@ class FashionTrainer:
         elif model_name == "linear":
             #Add linear model here
             pass
+        else:
+            self.model = FashionMNISTModel()
 
-        self.model = FashionMNISTModel()
         self.loader = FashionLoader()
 
         self.model = self.model.to(self.device)
@@ -39,7 +40,7 @@ class FashionTrainer:
 
         self.opt = torch.optim.Adam(self.model.parameters(), lr=self.lr)
 
-    def train(self, validate=False):
+    def train(self):
         total_loss = 0.0
         # Begin Epoch Run
         for epoch in range(self.epochs):
@@ -56,19 +57,23 @@ class FashionTrainer:
                 # Send image and labels to device.
                 img = img.to(self.device)
                 label = label.to(self.device)
-                output = self.model(img)
-                loss = self.crit(output, label)
 
-                curr_loss = curr_loss + loss.item()
+                self.opt.zero_grad()
+
+                output = self.model(img)
+
+                loss = self.crit(output, label)
+                loss.backward()
+
+                self.opt.step()
+
+                curr_loss = (curr_loss + loss.item())
 
                 # Write to TB
                 self.writer.add_scalar('Training Loss', curr_loss / inner_count, global_step=epoch)
 
                 # Set gradient
-                self.opt.zero_grad()
-                loss.backward()
 
-                self.opt.step()
                 # Calculate current loss
 
             # Update Total Loss
@@ -77,8 +82,8 @@ class FashionTrainer:
 
             # Print Statements
             print("Epoch: ", epoch)
-            print("Total Loss: ", total_loss)
-            print("Current Loss: ", curr_loss)
+            print("Total Loss: ", total_loss / len(self.loader.training_loader))
+            print("Current Loss: ", curr_loss / len(self.loader.training_loader))
 
 
         self.writer.close()
@@ -117,7 +122,7 @@ class FashionTrainer:
 
                         # Write to TB
                         self.writer.add_scalar('Training Loss', curr_loss / inner_count, global_step=epoch)
-                        self.writer.add_scalar('Accuracy', correct / len(self.loader.training_loader), global_step=epoch)
+                        self.writer.add_scalar('Accuracy', correct / len(self.loader.validation_loader), global_step=epoch)
 
 
 

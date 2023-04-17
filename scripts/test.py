@@ -46,4 +46,5 @@ class Model_Test:
 
 if __name__ == "__main__":
     # Placeholder, currently unable to train at home. Will train again tomorrow and run test script.
-    run_test = Model_Test(model_path="Placeholder", model_type="pre-trained")
+    run_test = Model_Test(model_path="models/model.pt", model_type="pre-trained")
+    run_test.test()
