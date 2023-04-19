@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -17,7 +18,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -52,9 +57,11 @@ public class MainActivity extends AppCompatActivity {
                 "Sneaker",
                 "Bag",
                 "Ankle boot"
+
         };
 
         public static String getRandomLabel() {
+
             Random random = new Random();
             return LABELS[random.nextInt(LABELS.length)];
         }
@@ -71,9 +78,9 @@ public class MainActivity extends AppCompatActivity {
 
         // This is getting the buttons and textview from the xml file.
         loadBtn = findViewById(R.id.load_btn);
-        classifybtn= findViewById(R.id.classify_btn);
-        img= findViewById(R.id.loadImage);
-        rndm= findViewById(R.id.loadText);
+        classifybtn = findViewById(R.id.classify_btn);
+        img = findViewById(R.id.loadImage);
+        rndm = findViewById(R.id.loadText);
 
 
         // This is registering the launcher for the activity result.
@@ -84,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
             public void onActivityResult(Uri uri) {
                 try {
 
-                    bm = MediaStore.Images.Media.getBitmap(getContentResolver(),uri);
+                    bm = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                     img.setImageBitmap(bm);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -103,51 +110,80 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        String filePath;
+        try {
+            filePath = assetFilePath("model.pth");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Module module = Module.load(filePath);
 
-            Module module = Module.load("model.pth");
-          //  IValue output.forward(IValue.from(InputTensor));
-       // Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bm, TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,TensorImageUtils.TORCHVISION_NORM_STD_RGB);
-        //converting img to a bitmap then to a tensor
-        //Bitmap bitmap = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
-        ByteBuffer byteBuffer = ByteBuffer.allocate(bm.getByteCount());
-        bm.copyPixelsToBuffer(byteBuffer);
-        byte[] byteArray = byteBuffer.array();
+        try {
+            module = Module.load(assetFilePath("model.pth"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        long[] shape = {1, bm.getHeight(), bm.getWidth(), 3}; // assuming RGB image
-        long[] inputShape = {1, 3, 28, 28}; // assuming input shape is (batch_size, num_channels, height, width)
-        long[] outputShape = {1, 1000}; // assuming output shape is (batch_size, num_classes)
+        Module finalModule = module;
+        classifybtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                //  IValue output.forward(IValue.from(InputTensor));
+                // Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bm, TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,TensorImageUtils.TORCHVISION_NORM_STD_RGB);
+                //converting img to a bitmap then to a tensor
+                //Bitmap bitmap = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
+                FloatBuffer floatBuffer = FloatBuffer.allocate(bm.getByteCount());
+                bm.copyPixelsToBuffer(floatBuffer);
+                float[] floatArray = floatBuffer.array();
 
-        // Convert the input image to a PyTorch tensor
-        Tensor inputTensor = Tensor.fromBlob(byteBuffer, inputShape);
+               // long[] shape = {1, bm.getHeight(), bm.getWidth(), 3}; // assuming RGB image
+                long[] inputShape = {1, 3, 28, 28}; // assuming input shape is (batch_size, num_channels, height, width)
+                long[] outputShape = {1, 10}; // assuming output shape is (batch_size, num_classes)
 
-        // Call the model on the input tensor and obtain the output tensor
-        Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
+                // Convert the input image to a PyTorch tensor
+                Tensor inputTensor = Tensor.fromBlob(floatBuffer, inputShape);
 
-        // Convert the output tensor to a Java float array
-        float[] outputArray = outputTensor.getDataAsFloatArray();
+                // Call the model on the input tensor and obtain the output tensor
+                Tensor outputTensor = finalModule.forward(IValue.from(inputTensor)).toTensor();
 
-        int predictedIndex = getMaxIndex(outputArray);
-        //FloatBuffer floatBuffer = ByteBuffer.wrap(byteArray).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        //Tensor tensor = Tensor.fromBlob(floatBuffer, shape);
+                // Convert the output tensor to a Java float array
+                float[] outputArray = outputTensor.getDataAsFloatArray();
 
-        classifybtn.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
-                try{
+                int predictedIndex = getMaxIndex(outputArray);
 
-                    //MobilenetV110224Quant module = MobilenetV110224Quant(model.pth);
-                    //Module module = Module.load(assetFilePath(this,"model.pth"));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                String predictedClassName = ClassLabels.LABELS[getMaxIndex(outputArray)];
 
-                rndm.setText(ClassLabels.getRandomLabel());
-
-
-
-
+                rndm.setText(predictedIndex);
             }
         });
+
+
+
+
+
+        //String fileContents = loadAssetFile("myFile.txt");
+
+        //AssetManager assetManager = getAssets();
+        //FloatBuffer floatBuffer = ByteBuffer.wrap(byteArray).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        //Tensor tensor = Tensor.fromBlob(floatBuffer, shape)
+
     }
+    public String assetFilePath (String assetName) throws IOException {
+        File file = new File(getFilesDir(), assetName);
+        if (file.exists()) {
+            return file.getAbsolutePath();
+        }
+
+        try (InputStream inputStream = getAssets().open(assetName); OutputStream outputStream = new FileOutputStream(file)) {
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            return file.getAbsolutePath();
+        }
+    }
+
+
 
     private int getMaxIndex(float[] outputArray) {
         int maxIndex = 0;
@@ -160,16 +196,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return maxIndex;
     }
-
-
-    /**
-     * This function creates an ArrayList of strings, creates a random number generator, adds 5 strings
-     * to the ArrayList, and returns a random string from the ArrayList
-     *
-     * @return A random string from the arraylist
-     */
-
-
-
-
 }

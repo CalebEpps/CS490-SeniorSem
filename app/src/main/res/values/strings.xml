@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Condiment Loader</string>
     <string name= "txt">Random Hello</string>
+    <string name="classify">Classify</string>
+    <string name="select_image">Select Image</string>
+    <string name="unidentified_object">Unidentified Object</string>
 </resources>
