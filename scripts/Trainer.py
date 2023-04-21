@@ -1,12 +1,8 @@
 import torch.cuda
 import torch.nn as nn
-from torch.autograd.grad_mode import F
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from CNNModel import FashionMNISTModel
 from Loader import FashionLoader
-import matplotlib as plt
-from torch.utils.tensorboard import SummaryWriter
-
 from scripts.Model import Net
 
 
@@ -21,11 +17,13 @@ class FashionTrainer:
 
         if model_name == "premade":
             self.model = Net()
+            self.model_type = "premade"
         elif model_name == "cnn":
             self.model = FashionMNISTModel()
+            self.models_type = "cnn"
         elif model_name == "linear":
+            self.model_type = "linear"
             #Add linear model here
-            pass
         else:
             self.model = FashionMNISTModel()
 
@@ -143,7 +141,14 @@ class FashionTrainer:
         self.epochs = epochs
 
     def save(self):
-        torch.save(self.model.state_dict(), "models/model.pt")
+        if self.model_type == "premade":
+            torch.save(self.model.state_dict(), "models/model.pt")
+        elif self.model_type == "cnn":
+            torch.save(self.model.state_dict(), "models/cnn_model.pt")
+        elif self.model_type == "linear":
+            torch.save(self.model.state_dict(), "models/linear_model.pt")
+        else:
+            print("Error Saving Model. Did you give the correct argument during intialization?")
 
     def get_correct_preds(self, out, labels):
         return out.argmax(dim=1).eq(labels).sum().item()
@@ -161,5 +166,5 @@ class FashionTrainer:
 
 
 if __name__ == "__main__":
-    trainer = FashionTrainer(lr=0.001, epochs=50, model_name="premade")
+    trainer = FashionTrainer(lr=0.001, epochs=100, model_name="premade")
     trainer.train()
