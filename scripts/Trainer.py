@@ -1,22 +1,32 @@
 import torch.cuda
 import torch.nn as nn
-from torch.autograd.grad_mode import F
-from torch.utils.data import Dataset, DataLoader
-from Model import FashionMNISTModel
-from Loader import FashionLoader
-import matplotlib as plt
 from torch.utils.tensorboard import SummaryWriter
+from CNNModel import FashionMNISTModel
+from Loader import FashionLoader
+from scripts.Model import Net
+
 
 class FashionTrainer:
     # Placeholder params for later (model)
-    def __init__(self, lr, epochs, crit=None):
+    def __init__(self, lr, epochs, crit=None, model_name=None):
         self.lr = lr
         self.epochs = epochs
         self.device = self.get_dev()
 
         self.writer = SummaryWriter()
 
-        self.model = FashionMNISTModel()
+        if model_name == "premade":
+            self.model = Net()
+            self.model_type = "premade"
+        elif model_name == "cnn":
+            self.model = FashionMNISTModel()
+            self.models_type = "cnn"
+        elif model_name == "linear":
+            self.model_type = "linear"
+            #Add linear model here
+        else:
+            self.model = FashionMNISTModel()
+
         self.loader = FashionLoader()
 
         self.model = self.model.to(self.device)
@@ -28,7 +38,7 @@ class FashionTrainer:
 
         self.opt = torch.optim.Adam(self.model.parameters(), lr=self.lr)
 
-    def train(self, validate=False):
+    def train(self):
         total_loss = 0.0
         # Begin Epoch Run
         for epoch in range(self.epochs):
@@ -45,19 +55,23 @@ class FashionTrainer:
                 # Send image and labels to device.
                 img = img.to(self.device)
                 label = label.to(self.device)
-                output = self.model(img)
-                loss = self.crit(output, label)
 
-                curr_loss = curr_loss + loss.item()
+                self.opt.zero_grad()
+
+                output = self.model(img)
+
+                loss = self.crit(output, label)
+                loss.backward()
+
+                self.opt.step()
+
+                curr_loss = (curr_loss + loss.item())
 
                 # Write to TB
                 self.writer.add_scalar('Training Loss', curr_loss / inner_count, global_step=epoch)
 
                 # Set gradient
-                self.opt.zero_grad()
-                loss.backward()
 
-                self.opt.step()
                 # Calculate current loss
 
             # Update Total Loss
@@ -66,68 +80,75 @@ class FashionTrainer:
 
             # Print Statements
             print("Epoch: ", epoch)
-            print("Total Loss: ", total_loss)
-            print("Current Loss: ", curr_loss)
+            print("Total Loss: ", total_loss / len(self.loader.training_loader))
+            print("Current Loss: ", curr_loss / len(self.loader.training_loader))
 
-        self.writer.close()
-
-    def validate(self):
-        total_loss = 0.0
-        # Begin Epoch Run
-        for epoch in range(self.epochs):
-
-            self.model.train(True)
-            # reset current loss to 0 for next training iteration
-            curr_loss = 0.0
-            correct = 0
-            # iterator
-            count = 0
-            for img, label in self.loader.validation_loader:
-                # Send image and labels to device.
-                img = img.to(self.device)
-                label = label.to(self.device)
-                output = self.model(img)
-                loss = self.crit(output, label)
-
-                curr_loss = loss.item()
-
-                correct += self.get_correct_preds(output, label)
-                # Write to TB
-                self.writer.add_scalar("Accuracy", correct / len(self.loader.training_set), epoch)
-                self.writer.add_scalar('Training Loss', curr_loss, global_step=epoch)
-
-                # Set gradient
-                self.opt.zero_grad()
-                loss.backward()
-
-                self.opt.step()
-                # Calculate current loss
-
-            # Update Total Loss
-            total_loss += curr_loss / (count + 1)
-            count += 1
-
-            # Print Statements
-            print("Epoch: ", epoch)
-            print("Total Loss: ", total_loss)
-            print("Current Loss: ", curr_loss)
-            print("Accuracy: ", (correct / len(self.loader.training_set)))
-            print("\n")
 
         self.writer.close()
         self.save()
 
-    def test(self):
-        size = len(self.loader.validation_loader)
+
+    def validate(self):
+            total_loss = 0.0
+            total_correct = 0
+            # Begin Epoch Run
+            for epoch in range(self.epochs):
+
+                self.model.eval()
+                # reset current loss to 0 for next training iteration
+                curr_loss = 0.0
+                correct = 0
+                # iterator
+                count = 0
+                inner_count = 0
+                with torch.no_grad():
+                    for img, label in self.loader.training_loader:
+                        inner_count += 1
+                        # Send image and labels to device.
+                        img = img.to(self.device)
+                        label = label.to(self.device)
+                        output = self.model(img)
+                        loss = self.crit(output, label)
+                        prediction = torch.argmax(self.model(img), dim=1)
+                        correct = sum(prediction==label).item()
+                        total_correct += correct
+
+                        curr_loss = curr_loss + loss.item()
 
 
 
+
+                        # Write to TB
+                        self.writer.add_scalar('Training Loss', curr_loss / inner_count, global_step=epoch)
+                        self.writer.add_scalar('Accuracy', correct / len(self.loader.validation_loader), global_step=epoch)
+
+
+
+
+                    # Update Total Loss
+                    total_loss += curr_loss / (count + 1)
+                    count += 1
+
+                    # Print Statements
+                    print("Epoch: ", epoch)
+                    print("Total Loss: ", total_loss)
+                    print("Current Loss: ", curr_loss)
+
+            self.writer.close()
+            self.save()
 
     def set_epochs(self, epochs):
         self.epochs = epochs
 
     def save(self):
-        torch.save(self.model.state_dict(), "model.pt")
+        if self.model_type == "premade":
+            torch.save(self.model.state_dict(), "models/model.pt")
+        elif self.model_type == "cnn":
+            torch.save(self.model.state_dict(), "models/cnn_model.pt")
+        elif self.model_type == "linear":
+            torch.save(self.model.state_dict(), "models/linear_model.pt")
+        else:
+            print("Error Saving Model. Did you give the correct argument during intialization?")
 
     def get_correct_preds(self, out, labels):
         return out.argmax(dim=1).eq(labels).sum().item()
@@ -145,5 +166,5 @@ class FashionTrainer:
 
 
 if __name__ == "__main__":
-    trainer = FashionTrainer(lr=0.001, epochs=100)
+    trainer = FashionTrainer(lr=0.001, epochs=100, model_name="premade")
     trainer.train()
