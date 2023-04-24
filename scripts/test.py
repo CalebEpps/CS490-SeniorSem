@@ -1,6 +1,8 @@
+import numpy as np
 import torch
 from Model import Net
 from torchvision import transforms
+from sklearn.metrics import confusion_matrix, classification_report
 
 import Loader
 
@@ -20,34 +22,54 @@ class Model_Test:
             self.model = Net()
 
         self.classes = self.loader.classes
-        # Initialize the lists for tracking predictions and correct count
-        self.correct_predictions = {label: 0 for label in self.classes}
-        self.total_predictions = {label: 0 for label in self.classes}
+        self.accuracy = 0
+
 
 
     def test(self):
         self.model.load_state_dict(torch.load(self.model_path))
         self.model.eval()
 
-        correct = 0
-        total = len(self.data_set)
+        y_pred = []
+        y_true = []
+
+
 
         with torch.no_grad():
             for img, label in self.loader.test_loader:
                 output = self.model(img)
                 _, prediction = torch.max(output, 1)
+                y_pred.extend(prediction)
 
-                for clss, out in zip(label, prediction):
-                    # If correct, increment correct in label list
-                    if clss == out:
-                        self.correct_predictions[self.classes[clss]] += 1
+                label = label.data.cpu().numpy()
+                y_true.extend(label)
 
-                    self.total_predictions[self.classes[clss]] += 1
+                conf_matrix = confusion_matrix(y_true, y_pred)
 
-        # Console Print the predictions:
+             # `conf_matrix.astype('float')` converts the confusion matrix to a float type.
+            conf_matrix = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+            #print(conf_matrix)
+            self.accuracy = conf_matrix.diagonal()
+            print(self.accuracy)
 
-        for lbl, correct in self.correct_predictions.items():
-            print("Class Name: " + lbl + " " + "Accuracy: ", 100 * float(correct) / self.total_predictions[lbl])
+            report = classification_report(y_true=y_true, y_pred=y_pred, output_dict=True)
+
+            print(report)
+            print("\n\n\n")
+
+            self.print_results(report=report)
+
+
+    def print_results(self, report):
+        for x in range(len(self.loader.classes)):
+            print("Accuracy for " + self.loader.classes[x] + "s" + " was", round((self.accuracy[x] * 100), 0), "%.")
+
+        print("---F1-Scores---")
+
+        for x in range(len(self.loader.classes)):
+            print("The f1-score for", self.loader.classes[x] + "s", "class  was", report.get(str(x)).get('f1-score'), ".")
+
+
 
 if __name__ == "__main__":
     # Placeholder, currently unable to train at home. Will train again tomorrow and run test script.

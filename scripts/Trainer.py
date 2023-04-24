@@ -23,7 +23,7 @@ class FashionTrainer:
             self.models_type = "cnn"
         elif model_name == "linear":
             self.model_type = "linear"
-            #Add linear model here
+            # Add linear model here
         else:
             self.model = FashionMNISTModel()
 
@@ -70,9 +70,15 @@ class FashionTrainer:
                 # Write to TB
                 self.writer.add_scalar('Training Loss', curr_loss / inner_count, global_step=epoch)
 
-                # Set gradient
+            # Run Validation Method
+            with torch.no_grad():
+                current_accuracy = self.validate()
+            # Write Accuracy
+            self.writer.add_scalar('Accuracy', current_accuracy, global_step=epoch)
 
-                # Calculate current loss
+            # Set gradient
+
+            # Calculate current loss
 
             # Update Total Loss
             total_loss += curr_loss / (count + 1)
@@ -82,60 +88,27 @@ class FashionTrainer:
             print("Epoch: ", epoch)
             print("Total Loss: ", total_loss / len(self.loader.training_loader))
             print("Current Loss: ", curr_loss / len(self.loader.training_loader))
-
+            print("Accuracy: ", current_accuracy)
 
         self.writer.close()
         self.save()
 
-
     def validate(self):
-            total_loss = 0.0
-            total_correct = 0
-            # Begin Epoch Run
-            for epoch in range(self.epochs):
+        self.model.eval()
+        num_correct = 0
+        total = 0
 
-                self.model.eval()
-                # reset current loss to 0 for next training iteration
-                curr_loss = 0.0
-                correct = 0
-                # iterator
-                count = 0
-                inner_count = 0
-                with torch.no_grad():
-                    for img, label in self.loader.training_loader:
-                        inner_count += 1
-                        # Send image and labels to device.
-                        img = img.to(self.device)
-                        label = label.to(self.device)
-                        output = self.model(img)
-                        loss = self.crit(output, label)
-                        prediction = torch.argmax(self.model(img), dim=1)
-                        correct = sum(prediction==label).item()
-                        total_correct += correct
+        for img, label in self.loader.validation_loader:
+            img = img.to(self.device)
+            label = label.to(self.device)
 
-                        curr_loss = curr_loss + loss.item()
+            output = torch.argmax(self.model(img), 1)
+            num_output_correct = sum(output == label).item()
 
+            num_correct += num_output_correct
+            total += len(img)
 
-
-
-                        # Write to TB
-                        self.writer.add_scalar('Training Loss', curr_loss / inner_count, global_step=epoch)
-                        self.writer.add_scalar('Accuracy', correct / len(self.loader.validation_loader), global_step=epoch)
-
-
-
-
-                    # Update Total Loss
-                    total_loss += curr_loss / (count + 1)
-                    count += 1
-
-                    # Print Statements
-                    print("Epoch: ", epoch)
-                    print("Total Loss: ", total_loss)
-                    print("Current Loss: ", curr_loss)
-
-            self.writer.close()
-            self.save()
+            return num_correct / total
 
     def set_epochs(self, epochs):
         self.epochs = epochs
@@ -152,7 +125,6 @@ class FashionTrainer:
 
     def get_correct_preds(self, out, labels):
         return out.argmax(dim=1).eq(labels).sum().item()
-
 
     @staticmethod
     def has_gpu():

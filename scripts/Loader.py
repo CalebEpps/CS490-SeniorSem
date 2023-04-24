@@ -31,8 +31,8 @@ class FashionLoader(Dataset):
         self.validation_loader = DataLoader(self.validation_set, batch_size=self.batch_size, shuffle=False)
         self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False)
 
-        self.classes = ('T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
-                        'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot')
+        self.classes = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+                        'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot']
 
     def training_set_length(self):
         return len(self.training_set)
