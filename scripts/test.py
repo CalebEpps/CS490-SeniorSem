@@ -9,9 +9,12 @@ import Loader
 
 class Model_Test:
     def __init__(self, model_path, model_type):
+        # Initialize loader with batch size 128, (Batch size is irrelevant in this case)
         self.loader = Loader.FashionLoader(batch_size=128)
         self.data_set = self.loader.test_dataset
+        # Set the model path. If time permits, add ability to use args
         self.model_path = model_path
+        # Temporary use of condition statements to allow training of multiple models
         if model_type == 'pre-trained':
             self.model = Net()
             self.path = "placeholder"
@@ -27,20 +30,20 @@ class Model_Test:
 
 
     def test(self):
+        # Load the requested model and set to eval mode
         self.model.load_state_dict(torch.load(self.model_path))
         self.model.eval()
 
         y_pred = []
         y_true = []
 
-
-
         with torch.no_grad():
             for img, label in self.loader.test_loader:
                 output = self.model(img)
+                # Make Prediction
                 _, prediction = torch.max(output, 1)
                 y_pred.extend(prediction)
-
+                # Extend Matrix with updated label (Needs to be numpy format, so convert)
                 label = label.data.cpu().numpy()
                 y_true.extend(label)
 
@@ -48,7 +51,8 @@ class Model_Test:
 
              # `conf_matrix.astype('float')` converts the confusion matrix to a float type.
             conf_matrix = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
-            #print(conf_matrix)
+
+            # According to docs, you can get the true accuracy by taking diagonal of confusion matrix
             self.accuracy = conf_matrix.diagonal()
             print(self.accuracy)
 

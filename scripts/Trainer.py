@@ -7,14 +7,13 @@ from scripts.Model import Net
 
 
 class FashionTrainer:
-    # Placeholder params for later (model)
     def __init__(self, lr, epochs, crit=None, model_name=None):
         self.lr = lr
         self.epochs = epochs
         self.device = self.get_dev()
-
+        # Summary writer is used later for graphing and evaluation purposes
         self.writer = SummaryWriter()
-
+        # Temporary condition statements that allow for model script to be selected
         if model_name == "premade":
             self.model = Net()
             self.model_type = "premade"
@@ -31,6 +30,7 @@ class FashionTrainer:
 
         self.model = self.model.to(self.device)
 
+        # Allows for setting of custom loss function
         if crit is None:
             self.crit = nn.CrossEntropyLoss()
         else:
@@ -43,11 +43,14 @@ class FashionTrainer:
         # Begin Epoch Run
         for epoch in range(self.epochs):
 
+            # Set the model to train mode
             self.model.train(True)
-            # reset current loss to 0 for next training iteration
+
+            # reset current loss to 0 for next training epoch
             curr_loss = 0.0
             correct = 0
-            # iterator
+
+            # iterators
             count = 0
             inner_count = 0
             for img, label in self.loader.training_loader:
@@ -60,11 +63,13 @@ class FashionTrainer:
 
                 output = self.model(img)
 
+                # Calculate the Loss each iteration
                 loss = self.crit(output, label)
                 loss.backward()
 
                 self.opt.step()
 
+                # Update Current Loss
                 curr_loss = (curr_loss + loss.item())
 
                 # Write to TB
@@ -76,15 +81,11 @@ class FashionTrainer:
             # Write Accuracy
             self.writer.add_scalar('Accuracy', current_accuracy, global_step=epoch)
 
-            # Set gradient
-
-            # Calculate current loss
-
             # Update Total Loss
             total_loss += curr_loss / (count + 1)
             count += 1
 
-            # Print Statements
+            # Print Statements for debugging
             print("Epoch: ", epoch)
             print("Total Loss: ", total_loss / len(self.loader.training_loader))
             print("Current Loss: ", curr_loss / len(self.loader.training_loader))
@@ -94,20 +95,23 @@ class FashionTrainer:
         self.save()
 
     def validate(self):
+        # Set model to eval mode
         self.model.eval()
         num_correct = 0
         total = 0
-
+        # Use the dataset from the validation loader
         for img, label in self.loader.validation_loader:
             img = img.to(self.device)
             label = label.to(self.device)
 
+            # Get the predicted output and set the number of correct
             output = torch.argmax(self.model(img), 1)
             num_output_correct = sum(output == label).item()
 
+            # Add the current number of correct to the total.
             num_correct += num_output_correct
             total += len(img)
-
+            # Returns the calculated accuracy
             return num_correct / total
 
     def set_epochs(self, epochs):
