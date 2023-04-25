@@ -1,38 +1,31 @@
-package com.example.loadimage;
+package com.example.imageclassifier;
 
 // This is importing the necessary libraries for the activity.
+
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.text.TextUtils;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Random;
-
 import org.pytorch.IValue;
 import org.pytorch.Module;
 import org.pytorch.Tensor;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.FloatBuffer;
+import java.nio.file.Files;
+import java.util.Random;
 //import org.pytorch.IValue;
 //import org.pytorch.torchvision.TensorImageUtils;
 
@@ -43,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     ImageView img;
     TextView rndm;
     Bitmap bm;
+
+    Module module;
 
     ActivityResultLauncher<String> launcher;
 
@@ -60,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
                 "Ankle boot"
 
         };
+
+
 
         public static String getRandomLabel() {
 
@@ -102,62 +99,43 @@ public class MainActivity extends AppCompatActivity {
 
         // This is setting the onClickListener for the loadBtn button. When the button is clicked, the
         // launcher is launched and the randomStringGen function is called.
-        loadBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launcher.launch("image/*");
+        loadBtn.setOnClickListener(view -> launcher.launch("image/*"));
 
-            }
-        });
-
-
-        String filePath;
-        try {
-            filePath = assetFilePath("model.pth");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Module module = Module.load(filePath);
 
         try {
-            module = Module.load(assetFilePath("model.pth"));
+            module = Module.load(assetFilePath("model.pt"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        Module finalModule = module;
 
+        classifybtn.setOnClickListener(view -> {
+            //  IValue output.forward(IValue.from(InputTensor));
+            // Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bm, TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,TensorImageUtils.TORCHVISION_NORM_STD_RGB);
+            //converting img to a bitmap then to a tensor
+            //Bitmap bitmap = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
+            FloatBuffer floatBuffer = FloatBuffer.allocate(bm.getByteCount());
+            bm.copyPixelsToBuffer(floatBuffer);
+            float[] floatArray = floatBuffer.array();
 
-        classifybtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //  IValue output.forward(IValue.from(InputTensor));
-                // Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bm, TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,TensorImageUtils.TORCHVISION_NORM_STD_RGB);
-                //converting img to a bitmap then to a tensor
-                //Bitmap bitmap = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
-                FloatBuffer floatBuffer = FloatBuffer.allocate(bm.getByteCount());
-                bm.copyPixelsToBuffer(floatBuffer);
-                float[] floatArray = floatBuffer.array();
+           // long[] shape = {1, bm.getHeight(), bm.getWidth(), 3}; // assuming RGB image
+            long[] inputShape = {1, 3, 28, 28}; // assuming input shape is (batch_size, num_channels, height, width)
+            long[] outputShape = {1, 10}; // assuming output shape is (batch_size, num_classes)
 
-               // long[] shape = {1, bm.getHeight(), bm.getWidth(), 3}; // assuming RGB image
-                long[] inputShape = {1, 3, 28, 28}; // assuming input shape is (batch_size, num_channels, height, width)
-                long[] outputShape = {1, 10}; // assuming output shape is (batch_size, num_classes)
+            // Convert the input image to a PyTorch tensor
+            Tensor inputTensor = Tensor.fromBlob(floatBuffer, inputShape);
 
-                // Convert the input image to a PyTorch tensor
-                Tensor inputTensor = Tensor.fromBlob(floatBuffer, inputShape);
+            // Call the model on the input tensor and obtain the output tensor
+            Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
 
-                // Call the model on the input tensor and obtain the output tensor
-                Tensor outputTensor = finalModule.forward(IValue.from(inputTensor)).toTensor();
+            // Convert the output tensor to a Java float array
+            float[] outputArray = outputTensor.getDataAsFloatArray();
 
-                // Convert the output tensor to a Java float array
-                float[] outputArray = outputTensor.getDataAsFloatArray();
+            int predictedIndex = getMaxIndex(outputArray);
 
-                int predictedIndex = getMaxIndex(outputArray);
+            String predictedClassName = ClassLabels.LABELS[getMaxIndex(outputArray)];
 
-                String predictedClassName = ClassLabels.LABELS[getMaxIndex(outputArray)];
-
-                rndm.setText(predictedIndex);
-            }
+            rndm.setText(predictedIndex);
         });
 
 
