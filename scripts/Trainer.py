@@ -2,8 +2,9 @@ import torch.cuda
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from CNNModel import FashionMNISTModel
+from LinearModel import LinearFashionMNISTModel
 from Loader import FashionLoader
-from scripts.Model import Net
+from Model import Net
 
 
 class FashionTrainer:
@@ -21,8 +22,8 @@ class FashionTrainer:
             self.model = FashionMNISTModel()
             self.models_type = "cnn"
         elif model_name == "linear":
+            self.model = LinearFashionMNISTModel()
             self.model_type = "linear"
-            # Add linear model here
         else:
             self.model = FashionMNISTModel()
 
@@ -143,4 +144,6 @@ class FashionTrainer:
 
 if __name__ == "__main__":
     trainer = FashionTrainer(lr=0.001, epochs=100, model_name="premade")
+    #trainer.train()
+    trainer = FashionTrainer(lr=0.001, epochs=100, model_name="linear")
     trainer.train()
