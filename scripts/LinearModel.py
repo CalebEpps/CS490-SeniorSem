@@ -10,12 +10,13 @@ from torch.utils.data import Dataset, DataLoader
 class LinearFashionMNISTModel(nn.Module):
     def __init__(self):
         # Init parent const
-        super(LinearFashionMNISTModel(), self).__init__()
+        super().__init__()
         
         # update the recursion limit
         #sys.setrecursionlimit(5000)
         
         #I just know that it's 28 x 28 and the in features seem to be 784 for 28x28 images
+        self.fc0 = nn.Linear(in_features=2352, out_features=784)
         self.fc1 = nn.Linear(in_features=784, out_features=600)
         self.fc2 = nn.Linear(in_features=600, out_features=350)
         self.fc3 = nn.Linear(in_features=350, out_features=150)
@@ -29,6 +30,7 @@ class LinearFashionMNISTModel(nn.Module):
         #flatten the input tensor
         in_item = in_item.view(in_item.size(0), -1)
         
+        in_item = F.relu(self.fc0(in_item))
         in_item = F.relu(self.fc1(in_item))
         in_item = F.relu(self.fc2(in_item))
         in_item = F.relu(self.fc3(in_item))

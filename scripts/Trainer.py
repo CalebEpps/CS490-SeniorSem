@@ -5,8 +5,8 @@ from CNNModel import FashionMNISTModel
 from LinearModel import LinearFashionMNISTModel
 from LinearModel import SimpleLinearFashionMNISTModel
 from Loader import FashionLoader
-from scripts.Model import Net
-from LinearFashionMNISTModel import LinearFashionMNISTModel
+from Model import Net
+#from LinearFashionMNISTModel import LinearFashionMNISTModel
 import argparse
 
 
@@ -22,11 +22,11 @@ class FashionTrainer:
         if model_name == "premade":
             self.model = Net()
             self.model_type = "premade"
-        elif model_name == "cnn":
+        elif model_name == "CNN":
             self.model = FashionMNISTModel()
-            self.models_type = "cnn"
+            self.models_type = "CNN"
         elif model_name == "linear":
-            self.model = SimpleLinearFashionMNISTModel()
+            self.model = LinearFashionMNISTModel()
             self.model_type = "linear"
             #sys.setrecursionlimit(5000)
         else:
@@ -93,7 +93,7 @@ class FashionTrainer:
             count += 1
 
             # Print Statements for debugging
-            print("Epoch: ", epoch)
+            print("Epoch: ", epoch+1)
             print("Total Loss: ", total_loss / len(self.loader.training_loader))
             print("Current Loss: ", curr_loss / len(self.loader.training_loader))
             print("Accuracy: ", current_accuracy)
@@ -129,6 +129,8 @@ class FashionTrainer:
             torch.save(self.model.state_dict(), "models/model.pt")
         elif self.model_type == "cnn":
             torch.save(self.model.state_dict(), "models/cnn_model.pt")
+        elif self.model_type == "linear":
+            torch.save(self.model.state_dict(), "models/linear_model.pt")
         else:
             print("Error Saving Model. Did you give the correct argument during intialization?")
 
@@ -150,7 +152,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Model Training Script")
 
-    parser.add_argument("model_to_train", type=str, help="Run the training script on specified model (premade or CNN).")
+    parser.add_argument("model_to_train", type=str, help="Run the training script on specified model: premade CNN linear")
     parser.add_argument("learning_rate", type=float, help="Specify the learning rate for this training session.")
     parser.add_argument("epochs", type=int, help="Specify the number of epochs for this training session.")
 
