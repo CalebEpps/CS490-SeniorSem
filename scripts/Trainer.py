@@ -4,6 +4,8 @@ from torch.utils.tensorboard import SummaryWriter
 from CNNModel import FashionMNISTModel
 from Loader import FashionLoader
 from scripts.Model import Net
+from LinearFashionMNISTModel import LinearFashionMNISTModel
+import argparse
 
 
 class FashionTrainer:
@@ -20,9 +22,6 @@ class FashionTrainer:
         elif model_name == "cnn":
             self.model = FashionMNISTModel()
             self.models_type = "cnn"
-        elif model_name == "linear":
-            self.model_type = "linear"
-            # Add linear model here
         else:
             self.model = FashionMNISTModel()
 
@@ -112,7 +111,7 @@ class FashionTrainer:
             num_correct += num_output_correct
             total += len(img)
             # Returns the calculated accuracy
-            return num_correct / total
+        return num_correct / total
 
     def set_epochs(self, epochs):
         self.epochs = epochs
@@ -122,8 +121,6 @@ class FashionTrainer:
             torch.save(self.model.state_dict(), "models/model.pt")
         elif self.model_type == "cnn":
             torch.save(self.model.state_dict(), "models/cnn_model.pt")
-        elif self.model_type == "linear":
-            torch.save(self.model.state_dict(), "models/linear_model.pt")
         else:
             print("Error Saving Model. Did you give the correct argument during intialization?")
 
@@ -142,5 +139,13 @@ class FashionTrainer:
 
 
 if __name__ == "__main__":
-    trainer = FashionTrainer(lr=0.001, epochs=100, model_name="premade")
+    parser = argparse.ArgumentParser(description="Model Training Script")
+
+    parser.add_argument("model_to_train", type=str, help="Run the training script on specified model (premade or CNN).")
+    parser.add_argument("learning_rate", type=float, help="Specify the learning rate for this training session.")
+    parser.add_argument("epochs", type=int, help="Specify the number of epochs for this training session.")
+
+    args = parser.parse_args()
+
+    trainer = FashionTrainer(lr=args.learning_rate, epochs=args.epochs, model_name=args.model_to_train)
     trainer.train()

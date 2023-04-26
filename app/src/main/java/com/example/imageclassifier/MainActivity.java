@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.pytorch.IValue;
+import org.pytorch.LiteModuleLoader;
 import org.pytorch.Module;
 import org.pytorch.Tensor;
 
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         try {
-            module = Module.load(assetFilePath("model.pt"));
+            module = LiteModuleLoader.load(assetFilePath("model.pt"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
