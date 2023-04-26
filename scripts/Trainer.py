@@ -2,10 +2,13 @@ import torch.cuda
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from CNNModel import FashionMNISTModel
+from LinearModel import LinearFashionMNISTModel
+from LinearModel import SimpleLinearFashionMNISTModel
 from Loader import FashionLoader
 from scripts.Model import Net
 from LinearFashionMNISTModel import LinearFashionMNISTModel
 import argparse
+
 
 
 class FashionTrainer:
@@ -22,10 +25,15 @@ class FashionTrainer:
         elif model_name == "cnn":
             self.model = FashionMNISTModel()
             self.models_type = "cnn"
+        elif model_name == "linear":
+            self.model = SimpleLinearFashionMNISTModel()
+            self.model_type = "linear"
+            #sys.setrecursionlimit(5000)
         else:
             self.model = FashionMNISTModel()
 
         self.loader = FashionLoader()
+        #self.loader = FashionLoader(batch_size=1)
 
         self.model = self.model.to(self.device)
 
@@ -139,6 +147,7 @@ class FashionTrainer:
 
 
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser(description="Model Training Script")
 
     parser.add_argument("model_to_train", type=str, help="Run the training script on specified model (premade or CNN).")
@@ -148,4 +157,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     trainer = FashionTrainer(lr=args.learning_rate, epochs=args.epochs, model_name=args.model_to_train)
+
+    #trainer = FashionTrainer(lr=0.001, epochs=100, model_name="premade")
+    #trainer.train()
+    #trainer = FashionTrainer(lr=0.001, epochs=100, model_name="linear")
+
     trainer.train()
