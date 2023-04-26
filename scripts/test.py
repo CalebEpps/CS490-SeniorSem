@@ -26,8 +26,8 @@ class Model_Test:
 
         self.classes = self.loader.classes
         self.accuracy = 0
-
-
+        self.report = None
+        self.printable_report = None
 
     def test(self):
         # Load the requested model and set to eval mode
@@ -49,30 +49,54 @@ class Model_Test:
 
                 conf_matrix = confusion_matrix(y_true, y_pred)
 
-             # `conf_matrix.astype('float')` converts the confusion matrix to a float type.
+            # `conf_matrix.astype('float')` converts the confusion matrix to a float type.
             conf_matrix = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
 
             # According to docs, you can get the true accuracy by taking diagonal of confusion matrix
             self.accuracy = conf_matrix.diagonal()
-            print(self.accuracy)
 
-            report = classification_report(y_true=y_true, y_pred=y_pred, output_dict=True)
+            self.printable_report = classification_report(y_true=y_true, y_pred=y_pred, output_dict=False)
+            self.report = classification_report(y_true=y_true, y_pred=y_pred, output_dict=True)
 
-            print(report)
-            print("\n\n\n")
-
-            self.print_results(report=report)
-
+            # Output all results
+            self.print_classification_report()
+            self.print_results(report=self.report)
+            self.show_accuracy()
 
     def print_results(self, report):
+
+        print("\n---Accuracy---")
         for x in range(len(self.loader.classes)):
             print("Accuracy for " + self.loader.classes[x] + "s" + " was", round((self.accuracy[x] * 100), 0), "%.")
 
-        print("---F1-Scores---")
-
+        print("\n---F1-Scores---")
         for x in range(len(self.loader.classes)):
-            print("The f1-score for", self.loader.classes[x] + "s", "class  was", report.get(str(x)).get('f1-score'), ".")
+            print("The f1-score for", self.loader.classes[x] + "s", "class  was", report.get(str(x)).get('f1-score'),
+                  ".")
 
+        print("\n---Recall---")
+        for x in range(len(self.loader.classes)):
+            print("The recall for", self.loader.classes[x] + "s", "class  was", report.get(str(x)).get('recall'), ".")
+
+        print("\n---Precision---")
+        for x in range(len(self.loader.classes)):
+            print("The precision for", self.loader.classes[x] + "s", "class  was", report.get(str(x)).get('precision'),
+                  ".")
+
+    def show_accuracy(self):
+        print("\n---Overall Accuracy---")
+        mean_accuracy = 0
+        for x in self.accuracy:
+            mean_accuracy += x
+
+        mean_accuracy /= len(self.accuracy)
+
+        mean_accuracy *= 100
+
+        print("The average accuracy across all classes was ", mean_accuracy, "%.")
+
+    def print_classification_report(self):
+        print("\n", self.printable_report)
 
 
 if __name__ == "__main__":
