@@ -3,8 +3,10 @@ import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from CNNModel import FashionMNISTModel
 from LinearModel import LinearFashionMNISTModel
+from LinearModel import SimpleLinearFashionMNISTModel
 from Loader import FashionLoader
 from Model import Net
+import sys
 
 
 class FashionTrainer:
@@ -22,12 +24,14 @@ class FashionTrainer:
             self.model = FashionMNISTModel()
             self.models_type = "cnn"
         elif model_name == "linear":
-            self.model = LinearFashionMNISTModel()
+            self.model = SimpleLinearFashionMNISTModel()
             self.model_type = "linear"
+            #sys.setrecursionlimit(5000)
         else:
             self.model = FashionMNISTModel()
 
         self.loader = FashionLoader()
+        #self.loader = FashionLoader(batch_size=1)
 
         self.model = self.model.to(self.device)
 
