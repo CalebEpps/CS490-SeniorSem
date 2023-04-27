@@ -8,7 +8,28 @@ from Loader import FashionLoader
 from Model import Net
 #from LinearFashionMNISTModel import LinearFashionMNISTModel
 import argparse
+"""
+Trains pytorch models on the Fashion MNIST dataset 
 
+Args:
+lr (float) Learning rate used by the optimizer
+epochs (int) Number of epochs to train the model
+crit (optional): loss function that is used If nothing is prpovided,then cross-entropy loss will be used
+model_name (optional): The name of a pre-defined model Options are "premade", "CNN", "linear". If it isn't provided, 
+a custom FashionMNISTModel will be used.
+
+Attributes: 
+self.lr(float) learning rate used by optimizer
+self.epochs(int) number of epochs to train model 
+self.device(self.get_dev) The device that will be acted upon
+self.writer(SummaryWriter) logging purposes
+self.model(NN Model) Pytorch model that will be trained
+self.model_type(str) types of models used
+self.loader(FashionLoader) used to load the dataset 
+self.crit = (nn.CrossEntropyLoss) used for training the model
+self.opt(Optimizer) updates parameters of the model
+
+"""
 
 
 class FashionTrainer:
