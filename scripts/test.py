@@ -49,6 +49,21 @@ class Model_Test:
         self.printable_report = None
         
         """
+        Runs the model on the test dataset and generates a classification report and matrix
+        
+        Args:
+        None
+        
+        Attributes:
+        y_pred(list) list to store predicted labels
+        y_true(list)list to store true labels
+        conf_matrix(array) store matrix
+        self.accuracy(float) stores the accuracy of the model
+        self.printable_report(str) classification report of the model that can be printed 
+        self.report stores the report of the model
+        
+        Returns:
+        None 
         
         """
 
@@ -86,9 +101,24 @@ class Model_Test:
             self.print_results(report=self.report)
             self.show_accuracy()
             
-            """
+        """
+        This method prints the accuracy of the results, F1 scores, recall, and precision
+        
+        Args:
+        report: classification report in dictionar format 
+     
+        Attributes:
+        None
+        
+        Variables: 
+        self instance of class
+        X: integr representing the index of the current class being printed
+        
+           
+        Returns: 
+        None
 
-"""
+        """
 
     def print_results(self, report):
 
@@ -111,6 +141,16 @@ class Model_Test:
                   ".")
                   
                   """
+                  Calculates and prints the total accuracy of the model of all the classes
+                  
+                  Args:
+                  None
+                  
+                  Variables:
+                  mean_accuracy(float): mean accuracy of all the classes
+                    
+                  Return:
+                  None
                   """
 
     def show_accuracy(self):
@@ -126,11 +166,35 @@ class Model_Test:
         print("The average accuracy across all classes was ", mean_accuracy, "%.")
         
         """
+        Prints the classification report in a legible format
+        
+        Args: 
+        None
+        
+        Returns:
+        None
+        
         """
 
     def print_classification_report(self):
         print("\n", self.printable_report)
-
+        
+        """
+        script instantiates a model_test object, sets the model_path and model_type parameters, 
+        and runs the test method to evaluate the pretrained model on the test dataset
+        
+        Args:
+        None
+        
+        Attributes:
+        None
+        
+        Variables:
+        run_test: instance of model_test class
+        model_path(string) stores the path to the pretrained model file 
+        model_type(string) specifies the type of pretrained model to use
+        
+        """
 
 if __name__ == "__main__":
     # Placeholder, currently unable to train at home. Will train again tomorrow and run test script.
