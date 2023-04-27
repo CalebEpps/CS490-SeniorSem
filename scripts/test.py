@@ -47,6 +47,10 @@ class Model_Test:
         self.accuracy = 0
         self.report = None
         self.printable_report = None
+        
+        """
+        
+        """
 
     def test(self):
         # Load the requested model and set to eval mode
@@ -81,6 +85,10 @@ class Model_Test:
             self.print_classification_report()
             self.print_results(report=self.report)
             self.show_accuracy()
+            
+            """
+
+"""
 
     def print_results(self, report):
 
@@ -101,6 +109,9 @@ class Model_Test:
         for x in range(len(self.loader.classes)):
             print("The precision for", self.loader.classes[x] + "s", "class  was", report.get(str(x)).get('precision'),
                   ".")
+                  
+                  """
+                  """
 
     def show_accuracy(self):
         print("\n---Overall Accuracy---")
@@ -113,6 +124,9 @@ class Model_Test:
         mean_accuracy *= 100
 
         print("The average accuracy across all classes was ", mean_accuracy, "%.")
+        
+        """
+        """
 
     def print_classification_report(self):
         print("\n", self.printable_report)
