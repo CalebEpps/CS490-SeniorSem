@@ -1,50 +1,14 @@
-Name that Item: An ML Image Classification App (Currently Active)
+# Image Classification App
+## Features 
+- Categorizes Clothing using a trained neural network
+- Simple 2 Button Interface
+- Included Python Scripts for Own Experimentation and Training
 
-Our Goal is to create a ML Image Classification App Using Python, Android Studio, and Pytorch.
-
-8
-Open Initial Commit
-Create Android Studio Project
-Ensure Everyone is Synced Up
-
-9
-Flesh Out Android Studio UI
-Begin Writing Python
-
-10
-Continue Working on Model Code
-Write methods for visualization (loss visualization, etc)
-
-11
-Start Initial Model Training
-Experimentation with epochs, LR
-Decide epochs for training
-
-12
-Discuss model optimizations
-Continue retraining Model
-Tweak epochs, lr as needed
-Finalize epoch count
-Finish training model
-
-13
-Start working with model in AS
-Complete Android App
-Done for C Grade
-Work with Add. Models
-
-14
-Code Cleanup
-Code Optimization
-Work with Add. Models
-Use *args/**kwargs for epochs, etc
-Done for B Grade
-
-15
-Finalize Additional models (linear + additional CNN)
-
-16
-Breathe
-Finalize Additional models
-Finalize ALL A & B Requirements
+## Using the Python Scripts
+1. Download a Python environment along with the Python Language Library for your Operating System
+2. Add Python to your path variable in Windows if applicable
+3. Open your CMD
+4. Navigate to the location of the Python scripts
+5. Run the files by typing Python Trainer.py (for training a model) or Test.py (for testing a model)
+6. Watch the output in the terminal
 
