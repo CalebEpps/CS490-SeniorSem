@@ -8,6 +8,25 @@ import Loader
 
 
 class Model_Test:
+    """
+    represents a model test instance
+    
+    Args:
+    model_path(str): variable that stores the path to the model file
+    model_type(str): variable that specifies the type of model
+    
+    Attributes:
+    loader(Loader.FashionLoader): instance of FashionLoader class
+    data_set: instance of test dataset 
+    model: instance of pytorch model class net 
+    classes (List[str]) : list of strings that contains names of the classes in datatset
+    accuracy (float) stores accuracy of the model 
+    report stores classification report of the model 
+    printable_report stores classificationreport of the model in format that can be printed
+    
+    Return: 
+    NONE 
+    """
     def __init__(self, model_path, model_type):
         # Initialize loader with batch size 128, (Batch size is irrelevant in this case)
         self.loader = Loader.FashionLoader(batch_size=128)
