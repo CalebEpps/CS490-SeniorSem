@@ -65,6 +65,35 @@ class FashionTrainer:
             self.crit = crit
 
         self.opt = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        
+        """
+       This is the training method that uses the provided parameters
+       
+       Args:
+       img a batch of images that will be validated 
+       label corresponding label for the images 
+
+      Attributes:
+      self.model(pytorch): the trained model used for validation
+      self.device(pytorch): the device used for training the model
+      self.loader.validation_loader(pytorch): the validation data loader containing validation images and labels
+     
+     Varibles: 
+     total_loss(float): running sum of the loss calculated for all training examples seen so far in the current epoch
+     cur_loss(float): he loss calculated for the current training example being processed
+     correct(int): The number of training examples for which the predicted output matches the true output for the current epoch
+     count(int): The number of training examples processed so far in the current epoch
+     inner_count(int): The number of iterations within the current epoch. Used for calculating the current loss
+     img(torch.Tensor): The image data of the current training example
+     label(torch.Tensor) : The label (class) of the current training example
+     output (torch.Tensor): The output of the model for the current training example
+     loss(torch.Tensor): The loss calculated for the current training example
+     current_accuracy(float): The accuracy of the model on the validation set after completing the current epoch of training 
+      
+      Return:
+      NONE
+        
+        """
 
     def train(self):
         total_loss = 0.0
@@ -121,6 +150,30 @@ class FashionTrainer:
 
         self.writer.close()
         self.save()
+        """
+        Calculates the accuracy of the trained model on the validation set
+        
+        Args:
+        self: An instance of the FashionTrainer class
+        
+        Attributes:
+        self.model (nn.Module): the PyTorch model used for validation
+        self.device (torch.device): the device (CPU/GPU) used for training and validation
+        self.loader.validation_loader (DataLoader): the validation data loader, used to iterate over the validation dataset
+        
+        Variables:
+        num_correct (int): the number of samples that are correctly classified validatation
+        total (int): total number of validation samples
+        img (torch.Tensor): image tensor from the validation dataset
+        label (torch.Tensor): the label tensor from the validation dataset
+        output (torch.Tensor): the predicted output tensor from the PyTorch model
+        num_output_correct (int): the number of correctly classified samples in the predicted output tensor
+        
+        
+        Returns:
+        float that calculates the accuracy of the model on the validation set
+       
+        """
 
     def validate(self):
         # Set model to eval mode
@@ -141,9 +194,36 @@ class FashionTrainer:
             total += len(img)
             # Returns the calculated accuracy
         return num_correct / total
+    
+    """
+    Sets the number of epochs for training.
+
+    Args:
+        epochs (int): Number of epochs to train the model.
+
+    Attributes:
+        self.epochs (int): Number of epochs for training.
+
+    Returns:
+        None
+    """
 
     def set_epochs(self, epochs):
         self.epochs = epochs
+        
+        """
+        Save the trained PyTorch model to a file based on its type
+
+    Args:
+        None
+
+    Attributes:
+        self.model_type (str): A string representing the type of model, which is used to determine the filename.
+        self.model (nn.Module): The PyTorch model to be saved.
+    
+    Returns:
+        None
+        """
 
     def save(self):
         if self.model_type == "premade":
@@ -154,20 +234,77 @@ class FashionTrainer:
             torch.save(self.model.state_dict(), "models/linear_model.pt")
         else:
             print("Error Saving Model. Did you give the correct argument during intialization?")
+    """
+    Returns the number of correct predictions based on the predicted outputs and labels
+
+        Args:
+            out (torch.Tensor): The predicted output of the model
+            labels (torch.Tensor): The true labels for the corresponding inputs
+            
+        Attributes:
+            None.
+
+        Returns:
+            int: Number of correct predictions
+
+        
+    """
 
     def get_correct_preds(self, out, labels):
         return out.argmax(dim=1).eq(labels).sum().item()
+    """
+    Check if CUDA GPU is available.
+
+Args: 
+    None
+
+Attributes:
+    None
+   
+
+Returns:
+    bool: True if CUDA GPU is available, False otherwise.
+    """
 
     @staticmethod
     def has_gpu():
         return torch.cuda.is_available()
+    """
+    Return the PyTorch device for training and validation.
+    
+    Attributes:
+            self.has_gpu(): A boolean indicating whether a GPU is available for use.
+           
+    Returns:
+            torch.device or str: The PyTorch device for training and validation.
+                If a GPU is available, returns torch.device("cuda:0"). Otherwise, returns "cpu".
+        
+    """
 
     def get_dev(self):
         if self.has_gpu():
             return torch.device("cuda:0")
         else:
             return "cpu"
+"""
+Parse command line arguments and start training a fashion classification model.
 
+    Args:
+        model_to_train (str): The name of the model to train. Must be one of "premade", "CNN", or "linear"
+        learning_rate (float): The learning rate to use during training
+        epochs (int): The number of epochs to train for
+
+
+    Raises:
+        ValueError: If an invalid model name is provided
+
+    Attributes:
+        trainer (FashionTrainer): An instance of the FashionTrainer class used to train the model
+        
+    
+    Returns:
+        None
+    """
 
 if __name__ == "__main__":
 
