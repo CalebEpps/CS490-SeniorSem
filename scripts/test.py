@@ -24,6 +24,10 @@ class Model_Test:
     report stores classification report of the model 
     printable_report stores classificationreport of the model in format that can be printed
     
+    Variables: 
+    self.path a placeholder variable
+    
+    
     Return: 
     NONE 
     """
@@ -61,6 +65,17 @@ class Model_Test:
         self.accuracy(float) stores the accuracy of the model
         self.printable_report(str) classification report of the model that can be printed 
         self.report stores the report of the model
+        
+        Variables:
+        self.model_path(string) 
+        self.model_type(string)
+        self.model: instance of pytorch model
+        self.loader instance of dataloader
+        img pytorch tensor that stores images
+        label Pytorch sensor that stores a label
+        output Pytorch sensor that stores output
+        prediction pytorch sensor that stores predicted label
+        mean_accuracy(float) stores the mean accuracy
         
         Returns:
         None 
