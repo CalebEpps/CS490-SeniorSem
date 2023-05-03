@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
 
                     bm = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+
                     img.setImageBitmap(bm);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -109,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        String filePath;
+        //
+        /*String filePath;
         try {
             filePath = assetFilePath("model.pth");
         } catch (IOException e) {
@@ -124,10 +126,18 @@ public class MainActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
 
-        Module finalModule = module;
+        Module finalModule = module;*/
+
+
         classifybtn.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View view) {
-                //  IValue output.forward(IValue.from(InputTensor));
+                //Random ran = new Random();
+
+                ClassLabels.getRandomLabel();
+                rndm.setText(ClassLabels.getRandomLabel());
+
+            /*   //  IValue output.forward(IValue.from(InputTensor));
                 // Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bm, TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,TensorImageUtils.TORCHVISION_NORM_STD_RGB);
                 //converting img to a bitmap then to a tensor
                 //Bitmap bitmap = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
@@ -143,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
                 Tensor inputTensor = Tensor.fromBlob(floatBuffer, inputShape);
 
                 // Call the model on the input tensor and obtain the output tensor
-                Tensor outputTensor = finalModule.forward(IValue.from(inputTensor)).toTensor();
+               Tensor outputTensor = finalModule.forward(IValue.from(inputTensor)).toTensor();
 
                 // Convert the output tensor to a Java float array
                 float[] outputArray = outputTensor.getDataAsFloatArray();
@@ -152,10 +162,9 @@ public class MainActivity extends AppCompatActivity {
 
                 String predictedClassName = ClassLabels.LABELS[getMaxIndex(outputArray)];
 
-                rndm.setText(predictedIndex);
+                rndm.setText(predictedIndex);*/
             }
         });
-
 
 
 
@@ -167,13 +176,13 @@ public class MainActivity extends AppCompatActivity {
         //Tensor tensor = Tensor.fromBlob(floatBuffer, shape)
 
     }
-    public String assetFilePath (String assetName) throws IOException {
+    /*public String assetFilePath (String assetName) throws IOException {
         File file = new File(getFilesDir(), assetName);
         if (file.exists()) {
             return file.getAbsolutePath();
         }
 
-        try (InputStream inputStream = getAssets().open(assetName); OutputStream outputStream = new FileOutputStream(file)) {
+        try (InputStream inputStream = getAssets().open(assetName); OutputStream outputStream = Files.newOutputStream(file.toPath())) {
             byte[] buffer = new byte[1024];
             int read;
             while ((read = inputStream.read(buffer)) != -1) {
@@ -181,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
             }
             return file.getAbsolutePath();
         }
-    }
+    }*/
 
 
 
